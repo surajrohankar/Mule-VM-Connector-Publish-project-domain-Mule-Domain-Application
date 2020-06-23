@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="publish-vm-connector" doc:id="9ff8e911-e6ae-4901-a057-5cdb8cd82aea" >
+		<http:listener doc:name="Listener" doc:id="1f131720-9c4d-40b3-be58-cc2f8154186a" path="${publishpath}" config-ref="HTTP_Listener_config"/>
+		<file:read doc:id="b8c2ace5-6ae1-48fd-90bc-1d296416d6a0" path="${file.filepath}" doc:name="Read JSON Data" config-ref="File_Config"/>
+		<foreach doc:name="For Each" doc:id="91f5f491-e17f-44bb-9902-663116bc8935" >
+			<vm:publish queueName="${vmqueue}" doc:id="f25f631f-81c2-4da9-b52c-5b140e2afae9" doc:name="Publish to input queue" config-ref="VM_Config"/>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="da7006d5-4212-4be6-86e9-4c508bb70c8a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="publishLogger" doc:id="3abb719f-3d35-41b0-824e-832bea1e7b49" message="#[payload]"/>
+	</flow>
+</mule>
